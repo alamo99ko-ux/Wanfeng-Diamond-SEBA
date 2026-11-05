@@ -239,7 +239,7 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
                   }}
                   className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-xs flex items-center justify-center gap-1.5 shrink-0"
                 >
-                  <span>{selectedDayNumber === 1 ? '용산역 23일 (오후 2시 부터 4시까지) 참가 신청' : '오송역 24일 (오후 2시 부터 4시까지) 참가 신청'}</span>
+                  <span>{selectedDayNumber === 1 ? '용산역 23일 (오후 2시~4시) 웹화면에서 바로신청' : '오송역 24일 (오후 2시~4시) 웹화면에서 바로신청'}</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -272,7 +272,7 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
                   }}
                   className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-xs flex items-center justify-center gap-1.5 shrink-0"
                 >
-                  <span>{selectedDayNumber === 3 ? '11월 25일 (14시~16시) 방문요청서 작성' : '11월 26일 (14시~16시) 방문요청서 작성'}</span>
+                  <span>{selectedDayNumber === 3 ? '11월 25일 (14시~16시) 웹화면에서 바로신청' : '11월 26일 (14시~16시) 웹화면에서 바로신청'}</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>

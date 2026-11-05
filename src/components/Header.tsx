@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plane, Moon, Sun, Download, FileText } from 'lucide-react';
+import { Plane, Moon, Sun, Download, FileText, Lock } from 'lucide-react';
 
 export type ActiveTab = 'integrated' | 'relationships' | 'documents' | 'itinerary' | 'budget' | 'checklists' | 'forms';
 
@@ -9,6 +9,7 @@ interface HeaderProps {
   darkMode: boolean;
   setDarkMode: (val: boolean) => void;
   overallChecklistProgress: number;
+  isBudgetUnlocked?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -17,13 +18,14 @@ export const Header: React.FC<HeaderProps> = ({
   darkMode,
   setDarkMode,
   overallChecklistProgress,
+  isBudgetUnlocked = false,
 }) => {
-  const navItems: { id: ActiveTab; label: string }[] = [
+  const navItems: { id: ActiveTab; label: string; isBudget?: boolean }[] = [
     { id: 'integrated', label: '종합 대시보드' },
     { id: 'relationships', label: '데이터 관계망 분석' },
+    { id: 'budget', label: '보고서 2 (비용·예산)', isBudget: true },
     { id: 'documents', label: '3대 문서 열람·대조' },
     { id: 'itinerary', label: '5일 일정·대학 매트릭스' },
-    { id: 'budget', label: '조직·예산 산출안' },
     { id: 'checklists', label: '담당자별 체크리스트' },
     { id: 'forms', label: '참가신청·방문요청' },
   ];
@@ -51,6 +53,29 @@ export const Header: React.FC<HeaderProps> = ({
           <nav className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
+              const isBudget = item.id === 'budget';
+
+              if (isBudget) {
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    title="비용 관련 보고서 (보안 비밀번호 필요: 28687870)"
+                    className={`px-3 py-2 text-xs font-semibold rounded-md whitespace-nowrap transition-colors flex items-center gap-1.5 border ${
+                      isActive
+                        ? 'bg-slate-300 dark:bg-slate-700 text-slate-900 dark:text-white border-slate-400 dark:border-slate-600 shadow-xs ring-1 ring-slate-400'
+                        : 'bg-slate-200/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-300 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <Lock className={`w-3 h-3 ${isBudgetUnlocked ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}`} />
+                    <span>{item.label}</span>
+                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-100 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400">
+                      {isBudgetUnlocked ? '해제됨' : '비용🔒'}
+                    </span>
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={item.id}
@@ -102,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('forms')}
               className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 rounded-lg transition-colors shadow-xs whitespace-nowrap"
             >
-              <span>신청서 작성</span>
+              <span>웹화면에서 바로신청</span>
             </button>
 
             <a

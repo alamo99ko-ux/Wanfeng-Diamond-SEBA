@@ -628,7 +628,7 @@ export const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 설명회 로드쇼 참가 신청서
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                오송역과 용산역 중 참여 가능한 일자와 장소를 선택(용산역 23일 오후 2시 부터 4시까지, 오송역 24일 오후 2시 부터 4시까지)하여 웹상에서 바로 제출할 수 있습니다.
+                오송역과 용산역 중 참여 가능한 일자와 장소를 선택(용산역 23일 오후 2시 부터 4시까지, 오송역 24일 오후 2시 부터 4시까지)하여 웹화면에서 바로신청할 수 있습니다.
               </p>
             </div>
             <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-700">
@@ -637,9 +637,9 @@ export const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               </span>
               <button
                 onClick={() => setActiveTab('forms')}
-                className="px-3.5 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-1"
+                className="px-3.5 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-1 shadow-2xs"
               >
-                <span>신청서 작성</span>
+                <span>웹화면에서 바로신청</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -669,9 +669,9 @@ export const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               </span>
               <button
                 onClick={() => setActiveTab('forms')}
-                className="px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center gap-1"
+                className="px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center gap-1 shadow-2xs"
               >
-                <span>방문요청서 작성</span>
+                <span>웹화면에서 바로신청</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>

@@ -25,6 +25,32 @@ export default function App() {
     date?: string;
   }>({ formType: 'roadshow', venue: '용산역 23일 (오후 2시 부터 4시까지)', date: '11월 25일 (14시~16시)' });
 
+  // Password Protection for Report 2 (비용·예산 관련 문서 보안: 28687870)
+  const [isBudgetUnlocked, setIsBudgetUnlocked] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('wanfeng_budget_unlocked') === 'true';
+    }
+    return false;
+  });
+
+  const handleUnlockBudget = (pwd: string): boolean => {
+    if (pwd.trim() === '28687870') {
+      setIsBudgetUnlocked(true);
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('wanfeng_budget_unlocked', 'true');
+      }
+      return true;
+    }
+    return false;
+  };
+
+  const handleLockBudget = () => {
+    setIsBudgetUnlocked(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('wanfeng_budget_unlocked');
+    }
+  };
+
   // Dark Mode State with document element synchronization
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -90,6 +116,7 @@ export default function App() {
         darkMode={darkMode}
         setDarkMode={setDarkMode}
         overallChecklistProgress={overallProgress}
+        isBudgetUnlocked={isBudgetUnlocked}
       />
 
       {/* Main Container */}
@@ -116,6 +143,9 @@ export default function App() {
             onSelectDoc={handleSelectDoc}
             setActiveTab={setActiveTab}
             onSelectChecklistAssignee={handleSelectChecklistAssignee}
+            isBudgetUnlocked={isBudgetUnlocked}
+            onUnlockBudget={handleUnlockBudget}
+            onLockBudget={handleLockBudget}
           />
         )}
 
@@ -131,6 +161,9 @@ export default function App() {
           <BudgetSimulator
             setActiveTab={setActiveTab}
             onSelectChecklistAssignee={handleSelectChecklistAssignee}
+            isBudgetUnlocked={isBudgetUnlocked}
+            onUnlockBudget={handleUnlockBudget}
+            onLockBudget={handleLockBudget}
           />
         )}
 
