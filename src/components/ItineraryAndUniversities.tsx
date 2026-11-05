@@ -24,11 +24,17 @@ import { ActiveTab } from './Header';
 interface ItineraryAndUniversitiesProps {
   setActiveTab: (tab: ActiveTab) => void;
   onSelectChecklistAssignee?: (assigneeId: string) => void;
+  onSelectFormPreset?: (preset: {
+    formType: 'roadshow' | 'visit' | 'list';
+    venue?: string;
+    date?: string;
+  }) => void;
 }
 
 export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> = ({
   setActiveTab,
   onSelectChecklistAssignee,
+  onSelectFormPreset,
 }) => {
   const [subTab, setSubTab] = useState<'itinerary' | 'universities' | 'careers' | 'simulator'>('itinerary');
   const [selectedDayNumber, setSelectedDayNumber] = useState<number>(1);
@@ -202,6 +208,75 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
                 </div>
               ))}
             </div>
+
+            {/* Quick Action Button for Roadshow / Visit Request based on current Day */}
+            {(selectedDayNumber === 1 || selectedDayNumber === 2) && (
+              <div className="p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="text-xs">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-blue-950 dark:text-blue-200 block">
+                      {selectedDayNumber === 1 ? '용산역 23일 로드쇼 설명회' : '오송역 24일 로드쇼 설명회'}
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded">
+                      오후 2시 부터 4시까지
+                    </span>
+                  </div>
+                  <span className="text-blue-700 dark:text-blue-300 text-[11px] mt-0.5 block">
+                    {selectedDayNumber === 1
+                      ? '수도권 항공대학 및 비행교육기관 대상 사업설명회 (오후 2시 ~ 4시)'
+                      : '중부권 항공대학 및 지자체 대상 사업설명회 (오후 2시 ~ 4시)'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    if (onSelectFormPreset) {
+                      onSelectFormPreset({
+                        formType: 'roadshow',
+                        venue: selectedDayNumber === 1 ? '용산역 23일 (오후 2시 부터 4시까지)' : '오송역 24일 (오후 2시 부터 4시까지)',
+                      });
+                    }
+                    setActiveTab('forms');
+                  }}
+                  className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-xs flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  <span>{selectedDayNumber === 1 ? '용산역 23일 (오후 2시 부터 4시까지) 참가 신청' : '오송역 24일 (오후 2시 부터 4시까지) 참가 신청'}</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {(selectedDayNumber === 3 || selectedDayNumber === 4) && (
+              <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="text-xs">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-emerald-950 dark:text-emerald-200 block">
+                      {selectedDayNumber === 3 ? '11월 25일 지자체·대학 현장 방문요청' : '11월 26일 지역 기관·대학 현장 방문요청'}
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded">
+                      요청시간: 14시~16시
+                    </span>
+                  </div>
+                  <span className="text-emerald-700 dark:text-emerald-300 text-[11px] mt-0.5 block">
+                    대표단이 귀 기관(도시)을 직접 찾아가 비행교육 인프라 및 협력 방안을 실사·협의합니다. (14시~16시)
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    if (onSelectFormPreset) {
+                      onSelectFormPreset({
+                        formType: 'visit',
+                        date: selectedDayNumber === 3 ? '11월 25일 (14시~16시)' : '11월 26일 (14시~16시)',
+                      });
+                    }
+                    setActiveTab('forms');
+                  }}
+                  className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-xs flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  <span>{selectedDayNumber === 3 ? '11월 25일 (14시~16시) 방문요청서 작성' : '11월 26일 (14시~16시) 방문요청서 작성'}</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
 
             {/* Hourly Timetable */}
             <div className="pt-4 space-y-3">

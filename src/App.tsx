@@ -11,6 +11,7 @@ import { DocumentViewer } from './components/DocumentViewer';
 import { ItineraryAndUniversities } from './components/ItineraryAndUniversities';
 import { BudgetSimulator } from './components/BudgetSimulator';
 import { RoleChecklistCenter } from './components/RoleChecklistCenter';
+import { RegistrationAndVisitForms } from './components/RegistrationAndVisitForms';
 import { INITIAL_CHECKLISTS, ChecklistItem } from './data/checklistsData';
 import { Plane, FileText, GitGraph, CheckCircle2, Building } from 'lucide-react';
 
@@ -18,6 +19,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('integrated');
   const [selectedDocId, setSelectedDocId] = useState<string>('doc-sacheon');
   const [selectedAssigneeFilter, setSelectedAssigneeFilter] = useState<string>('all');
+  const [formPreset, setFormPreset] = useState<{
+    formType: 'roadshow' | 'visit' | 'list';
+    venue?: string;
+    date?: string;
+  }>({ formType: 'roadshow', venue: '용산역 23일 (오후 2시 부터 4시까지)', date: '11월 25일 (14시~16시)' });
 
   // Dark Mode State with document element synchronization
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -28,6 +34,10 @@ export default function App() {
     }
     return false;
   });
+
+  useEffect(() => {
+    document.title = 'Wanfeng Diamond SEBA Partners';
+  }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -113,6 +123,7 @@ export default function App() {
           <ItineraryAndUniversities
             setActiveTab={setActiveTab}
             onSelectChecklistAssignee={handleSelectChecklistAssignee}
+            onSelectFormPreset={setFormPreset}
           />
         )}
 
@@ -130,6 +141,14 @@ export default function App() {
             initialAssigneeFilter={selectedAssigneeFilter}
             setActiveTab={setActiveTab}
             onSelectDoc={handleSelectDoc}
+          />
+        )}
+
+        {activeTab === 'forms' && (
+          <RegistrationAndVisitForms
+            initialFormType={formPreset.formType}
+            defaultVenue={formPreset.venue}
+            defaultDate={formPreset.date}
           />
         )}
       </main>

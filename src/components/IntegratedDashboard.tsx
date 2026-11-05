@@ -592,6 +592,93 @@ export const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
         </div>
       </section>
 
+      {/* 6-1. Roadshow & Visit Request Callout */}
+      <section className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-blue-50 via-indigo-50 to-slate-50 dark:from-slate-900 dark:via-blue-950/40 dark:to-slate-900 border border-blue-200 dark:border-blue-900/60 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <div className="text-xs font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase">
+              Online Registration & Visit Requests
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              로드쇼 참가신청서 및 지자체·대학 방문요청서 접수
+            </h2>
+          </div>
+          <button
+            onClick={() => setActiveTab('forms')}
+            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 self-start sm:self-auto"
+          >
+            <span>전체 접수 양식 바로가기</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+          {/* Form 1 Card */}
+          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/80 border border-blue-100 dark:border-blue-900/40 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 rounded">
+                  양식 1
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  수도권·중부권 대학 및 기관
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                설명회 로드쇼 참가 신청서
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                오송역과 용산역 중 참여 가능한 일자와 장소를 선택(용산역 23일 오후 2시 부터 4시까지, 오송역 24일 오후 2시 부터 4시까지)하여 웹상에서 바로 제출할 수 있습니다.
+              </p>
+            </div>
+            <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-700">
+              <span className="text-[11px] font-mono text-blue-600 dark:text-blue-400">
+                ● 용산역 23일(오후 2시~4시) / ● 오송역 24일(오후 2시~4시)
+              </span>
+              <button
+                onClick={() => setActiveTab('forms')}
+                className="px-3.5 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-1"
+              >
+                <span>신청서 작성</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* Form 2 Card */}
+          <div className="p-5 rounded-xl bg-white dark:bg-slate-800/80 border border-emerald-100 dark:border-emerald-900/40 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 rounded">
+                  양식 2
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  지자체·대학 실사 방문 (14시~16시)
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                현장 방문요청서
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                11월 25일 또는 26일(요청시간: 14시~16시) 중 택일, 도시 이름을 입력하고 기관명, 담당자이름, 전화번호, 이메일주소를 기재하여 실사 방문을 요청합니다.
+              </p>
+            </div>
+            <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-700">
+              <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
+                ● 11월 25일(14시~16시) / ● 11월 26일(14시~16시)
+              </span>
+              <button
+                onClick={() => setActiveTab('forms')}
+                className="px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center gap-1"
+              >
+                <span>방문요청서 작성</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 7. Bottom Action Banner */}
       <section className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
         <div className="space-y-2 text-center md:text-left">

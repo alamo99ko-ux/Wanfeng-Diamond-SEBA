@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plane, Moon, Sun, Download, FileText } from 'lucide-react';
 
-export type ActiveTab = 'integrated' | 'relationships' | 'documents' | 'itinerary' | 'budget' | 'checklists';
+export type ActiveTab = 'integrated' | 'relationships' | 'documents' | 'itinerary' | 'budget' | 'checklists' | 'forms';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -25,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'itinerary', label: '5일 일정·대학 매트릭스' },
     { id: 'budget', label: '조직·예산 산출안' },
     { id: 'checklists', label: '담당자별 체크리스트' },
+    { id: 'forms', label: '참가신청·방문요청' },
   ];
 
   return (
@@ -95,6 +96,13 @@ export const Header: React.FC<HeaderProps> = ({
               className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            <button
+              onClick={() => setActiveTab('forms')}
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 rounded-lg transition-colors shadow-xs whitespace-nowrap"
+            >
+              <span>신청서 작성</span>
             </button>
 
             <a
