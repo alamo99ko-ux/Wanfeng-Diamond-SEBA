@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ITINERARY_DAYS, 
   UNIVERSITIES_DATA, 
   CAREER_TRACKS, 
-  UniversityModel 
+  UniversityModel,
+  ItineraryDay
 } from '../data/universitiesAndItineraryData';
 import { 
   Calendar, 
@@ -17,7 +18,8 @@ import {
   Compass, 
   CheckCircle2,
   Clock,
-  ChevronRight
+  ChevronRight,
+  Edit3
 } from 'lucide-react';
 import { ActiveTab } from './Header';
 
@@ -46,7 +48,70 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
   const [da42Count, setDa42Count] = useState<number>(2);
   const [trainingHoursPerPlane, setTrainingHoursPerPlane] = useState<number>(400);
 
-  const selectedDay = ITINERARY_DAYS.find((d) => d.dayNumber === selectedDayNumber) || ITINERARY_DAYS[0];
+  // Itinerary state with localStorage persistence for 23rd~27th schedule
+  const [itineraryDays, setItineraryDays] = useState<ItineraryDay[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('wanfeng_custom_itinerary_days');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return ITINERARY_DAYS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('wanfeng_custom_itinerary_days', JSON.stringify(itineraryDays));
+  }, [itineraryDays]);
+
+  const [editingDayNumber, setEditingDayNumber] = useState<number | null>(null);
+  const [showMasterEditModal, setShowMasterEditModal] = useState<boolean>(false);
+
+  // Single day edit fields
+  const [editDate, setEditDate] = useState('');
+  const [editDayOfWeek, setEditDayOfWeek] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [editRegion, setEditRegion] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+
+  // Master edit array
+  const [masterDays, setMasterDays] = useState<ItineraryDay[]>(itineraryDays);
+
+  const selectedDay = itineraryDays.find((d) => d.dayNumber === selectedDayNumber) || itineraryDays[0];
+
+  const handleOpenSingleEdit = (day: ItineraryDay) => {
+    setEditingDayNumber(day.dayNumber);
+    setEditDate(day.date);
+    setEditDayOfWeek(day.dayOfWeek);
+    setEditTitle(day.title);
+    setEditRegion(day.region);
+    setEditLocation(day.location);
+  };
+
+  const handleSaveSingleEdit = () => {
+    if (editingDayNumber === null) return;
+    setItineraryDays((prev) =>
+      prev.map((d) =>
+        d.dayNumber === editingDayNumber
+          ? { ...d, date: editDate, dayOfWeek: editDayOfWeek, title: editTitle, region: editRegion, location: editLocation }
+          : d
+      )
+    );
+    setEditingDayNumber(null);
+  };
+
+  const handleOpenMasterEdit = () => {
+    setMasterDays(JSON.parse(JSON.stringify(itineraryDays)));
+    setShowMasterEditModal(true);
+  };
+
+  const handleSaveMasterEdit = () => {
+    setItineraryDays(masterDays);
+    setShowMasterEditModal(false);
+  };
 
   const filteredUniversities = UNIVERSITIES_DATA.filter((u) => {
     const matchRegion = selectedRegion === 'all' || u.region === selectedRegion;
@@ -134,32 +199,82 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
       {/* 1. ITINERARY TAB */}
       {subTab === 'itinerary' && (
         <div className="space-y-6">
-          {/* Day Selector Buttons */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-            {ITINERARY_DAYS.map((day) => {
+          {/* Master Edit Bar */}
+          <div className="flex items-center justify-between p-4 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs">
+            <div>
+              <span className="font-bold text-slate-900 dark:text-white">
+                5일 일정 타임라인 (11월 23일 ~ 27일) 관리
+              </span>
+              <p className="text-slate-500 dark:text-slate-400 mt-0.5">
+                일자별(23~27일) 일자, 요일, 일정 제목을 화면에서 실시간으로 직접 변경할 수 있습니다.
+              </p>
+            </div>
+            <button
+              onClick={handleOpenMasterEdit}
+              className="px-3.5 py-2 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors flex items-center gap-1.5 shadow-2xs shrink-0"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>전체 일정 및 제목 일괄 변경</span>
+            </button>
+          </div>
+
+          {/* Day Selector Buttons with Individual Edit Action */}
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+            {itineraryDays.map((day) => {
               const isSelected = day.dayNumber === selectedDayNumber;
               return (
-                <button
+                <div
                   key={day.dayNumber}
-                  onClick={() => setSelectedDayNumber(day.dayNumber)}
-                  className={`p-3.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                  className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between ${
                     isSelected
                       ? 'bg-blue-600 dark:bg-blue-600 text-white border-blue-600 shadow-sm'
                       : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-blue-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between text-xs">
-                    <span className={`font-mono font-bold ${isSelected ? 'text-blue-200' : 'text-blue-600 dark:text-blue-400'}`}>
-                      DAY 0{day.dayNumber}
-                    </span>
-                    <span className={`text-[11px] ${isSelected ? 'text-blue-100' : 'text-slate-400'}`}>
-                      {day.date.slice(5)}
-                    </span>
+                  <div
+                    onClick={() => setSelectedDayNumber(day.dayNumber)}
+                    className="cursor-pointer space-y-1"
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <span className={`font-mono font-bold ${isSelected ? 'text-blue-200' : 'text-blue-600 dark:text-blue-400'}`}>
+                        DAY 0{day.dayNumber}
+                      </span>
+                      <span className={`text-[11px] ${isSelected ? 'text-blue-100' : 'text-slate-400'}`}>
+                        {day.date}
+                      </span>
+                    </div>
+                    <div className="font-bold text-xs sm:text-sm truncate">
+                      {day.region}
+                    </div>
+                    <div className={`text-[11px] line-clamp-1 ${isSelected ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                      {day.title}
+                    </div>
                   </div>
-                  <div className="font-bold text-xs sm:text-sm mt-1 truncate">
-                    {day.region}
+
+                  <div className="pt-2 mt-2 border-t border-white/10 dark:border-slate-800 flex items-center justify-between">
+                    <button
+                      onClick={() => setSelectedDayNumber(day.dayNumber)}
+                      className={`text-[11px] font-semibold underline ${isSelected ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`}
+                    >
+                      상세보기
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenSingleEdit(day);
+                      }}
+                      className={`px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors ${
+                        isSelected
+                          ? 'bg-white/20 hover:bg-white/30 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
+                      }`}
+                      title="이 일자 및 제목 바로 수정"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>수정</span>
+                    </button>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -168,12 +283,19 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
-                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-blue-600 dark:text-blue-400">
+                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-blue-600 dark:text-blue-400 flex-wrap">
                   <span>DAY 0{selectedDay.dayNumber}</span>
                   <span aria-hidden="true">·</span>
                   <span>{selectedDay.date} ({selectedDay.dayOfWeek})</span>
                   <span aria-hidden="true">·</span>
                   <span>{selectedDay.region}</span>
+                  <button
+                    onClick={() => handleOpenSingleEdit(selectedDay)}
+                    className="ml-2 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 flex items-center gap-1"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>이 일자 수정</span>
+                  </button>
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">
                   {selectedDay.title}
@@ -615,6 +737,208 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
                 약 {annualFuelSavings.toLocaleString()}만 원
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">100LL 가솔린 대비 Jet-A1 절감</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SINGLE DAY EDIT MODAL */}
+      {editingDayNumber !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-blue-600" />
+                <span>DAY {editingDayNumber} 일정 및 제목 수정</span>
+              </h3>
+              <button
+                onClick={() => setEditingDayNumber(null)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">일자 (Date)</label>
+                <input
+                  type="text"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  placeholder="예: 2026.11.23"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">요일 (Day of Week)</label>
+                <input
+                  type="text"
+                  value={editDayOfWeek}
+                  onChange={(e) => setEditDayOfWeek(e.target.value)}
+                  placeholder="예: 월요일"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">일정 제목 (Title)</label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="일정 제목 입력"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">지역 / 거점명 (Region)</label>
+                <input
+                  type="text"
+                  value={editRegion}
+                  onChange={(e) => setEditRegion(e.target.value)}
+                  placeholder="예: 서울 · 용산"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">상세 장소 (Location)</label>
+                <input
+                  type="text"
+                  value={editLocation}
+                  onChange={(e) => setEditLocation(e.target.value)}
+                  placeholder="예: 나인트리 프리미어 로카우스 호텔"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setEditingDayNumber(null)}
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSaveSingleEdit}
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700"
+              >
+                변경사항 저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MASTER ALL DAYS EDIT MODAL */}
+      {showMasterEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Edit3 className="w-5 h-5 text-blue-600" />
+                  <span>전체 5일 일정 (11월 23일 ~ 27일) 일괄 변경</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  각 일자별 날짜, 요일, 지역, 일정 제목을 한 번에 편집하고 저장할 수 있습니다.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowMasterEditModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {masterDays.map((day, idx) => (
+                <div key={day.dayNumber} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                  <div className="flex items-center justify-between text-xs font-mono font-bold text-blue-600 dark:text-blue-400">
+                    <span>DAY 0{day.dayNumber}</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">일자</label>
+                      <input
+                        type="text"
+                        value={day.date}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setMasterDays((prev) =>
+                            prev.map((d, i) => (i === idx ? { ...d, date: val } : d))
+                          );
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">요일</label>
+                      <input
+                        type="text"
+                        value={day.dayOfWeek}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setMasterDays((prev) =>
+                            prev.map((d, i) => (i === idx ? { ...d, dayOfWeek: val } : d))
+                          );
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">지역명</label>
+                      <input
+                        type="text"
+                        value={day.region}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setMasterDays((prev) =>
+                            prev.map((d, i) => (i === idx ? { ...d, region: val } : d))
+                          );
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-xs">
+                    <label className="font-semibold text-slate-700 dark:text-slate-300 block mb-1">일정 제목</label>
+                    <input
+                      type="text"
+                      value={day.title}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setMasterDays((prev) =>
+                          prev.map((d, i) => (i === idx ? { ...d, title: val } : d))
+                        );
+                      }}
+                      className="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setShowMasterEditModal(false)}
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleSaveMasterEdit}
+                className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700"
+              >
+                전체 변경사항 저장
+              </button>
             </div>
           </div>
         </div>

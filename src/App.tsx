@@ -62,7 +62,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    document.title = 'Wanfeng Diamond SEBA Partners';
+    document.title = 'Wanfeng Diamond Korea Hub';
   }, []);
 
   useEffect(() => {
