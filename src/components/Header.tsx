@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div className="flex flex-col">
               <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap">
-                SEBA · Wanfeng Diamond Korea Hub
+                Diamond Korea
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                 만풍그룹 방한 및 사천 경비행기 조립공장 유치 포털
