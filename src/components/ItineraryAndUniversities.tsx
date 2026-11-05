@@ -19,7 +19,8 @@ import {
   CheckCircle2,
   Clock,
   ChevronRight,
-  Edit3
+  Edit3,
+  Plane
 } from 'lucide-react';
 import { ActiveTab } from './Header';
 
@@ -31,12 +32,14 @@ interface ItineraryAndUniversitiesProps {
     venue?: string;
     date?: string;
   }) => void;
+  onOpenAircraftModal?: () => void;
 }
 
 export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> = ({
   setActiveTab,
   onSelectChecklistAssignee,
   onSelectFormPreset,
+  onOpenAircraftModal,
 }) => {
   const [subTab, setSubTab] = useState<'itinerary' | 'universities' | 'careers' | 'simulator'>('itinerary');
   const [selectedDayNumber, setSelectedDayNumber] = useState<number>(1);
@@ -147,8 +150,19 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
           </p>
         </div>
 
-        {/* Sub-tab segmented buttons */}
-        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg self-start sm:self-auto flex-wrap">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          {onOpenAircraftModal && (
+            <button
+              onClick={onOpenAircraftModal}
+              className="px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
+            >
+              <Plane className="w-3.5 h-3.5" />
+              <span>DA40/DA42 제원 비교</span>
+            </button>
+          )}
+
+          {/* Sub-tab segmented buttons */}
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg flex-wrap">
           <button
             onClick={() => setSubTab('itinerary')}
             className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
@@ -195,6 +209,7 @@ export const ItineraryAndUniversities: React.FC<ItineraryAndUniversitiesProps> =
           </button>
         </div>
       </div>
+    </div>
 
       {/* 1. ITINERARY TAB */}
       {subTab === 'itinerary' && (

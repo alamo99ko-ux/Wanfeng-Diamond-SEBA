@@ -125,7 +125,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                   setSelectedSectionIdx(0);
                   setPasswordError(false);
                 }}
-                title={isBudget ? '비용 관련 대외비 보고서 (보안 비밀번호 필요: 28687870)' : undefined}
+                title={isBudget ? '비용 관련 대외비 보고서 (보안 인증 필요)' : undefined}
                 className={`px-4 py-2 text-xs font-semibold rounded-lg whitespace-nowrap transition-colors flex items-center gap-2 border ${
                   isBudget
                     ? isSelected
@@ -255,7 +255,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                         setPasswordInput(e.target.value);
                         setPasswordError(false);
                       }}
-                      placeholder="비밀번호 8자리 입력 (28687870)"
+                      placeholder="보안 비밀번호 8자리 입력"
                       className={`w-full px-4 py-2.5 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 pr-10 ${
                         passwordError
                           ? 'border-red-500 focus:ring-red-400'
@@ -289,10 +289,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                     </button>
                   </div>
                 </form>
-
-                <div className="text-[11px] text-slate-400 dark:text-slate-500">
-                  보안 패스워드 설정: <span className="font-mono font-semibold">28687870</span>
-                </div>
               </div>
             ) : (
               <>
@@ -478,7 +474,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                         비용 대외비 보안 잠금 상태
                       </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        비밀번호(28687870)를 입력하여 인력 산출 및 예산 상세를 열람하세요.
+                        비밀번호를 입력하여 인력 산출 및 예산 상세를 열람하세요.
                       </p>
                       <button
                         onClick={() => {

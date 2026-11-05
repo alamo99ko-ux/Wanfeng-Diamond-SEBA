@@ -25,7 +25,9 @@ import {
   HelpCircle,
   RefreshCw,
   FolderUp,
-  ShieldCheck
+  ShieldCheck,
+  Search,
+  Filter
 } from 'lucide-react';
 
 export type RoadshowVenueChoice = 
@@ -188,6 +190,150 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
   useEffect(() => {
     localStorage.setItem('wanfeng_visit_requests', JSON.stringify(visitList));
   }, [visitList]);
+
+  // Search & Filter state for submissions list
+  const [listSearchQuery, setListSearchQuery] = useState('');
+  const [venueFilter, setVenueFilter] = useState<'all' | 'yongsan' | 'osong'>('all');
+  const [visitDateFilter, setVisitDateFilter] = useState<'all' | '25' | '26'>('all');
+
+  // Filtered Roadshow Submissions
+  const filteredRoadshowList = roadshowList.filter((item) => {
+    const matchVenue =
+      venueFilter === 'all' ||
+      (venueFilter === 'yongsan' && item.selectedVenue.includes('용산')) ||
+      (venueFilter === 'osong' && item.selectedVenue.includes('오송'));
+
+    const query = listSearchQuery.trim().toLowerCase();
+    const matchQuery =
+      query === '' ||
+      item.orgName.toLowerCase().includes(query) ||
+      item.name.toLowerCase().includes(query) ||
+      item.phone.toLowerCase().includes(query) ||
+      item.email.toLowerCase().includes(query) ||
+      item.selectedVenue.toLowerCase().includes(query) ||
+      item.interests.some((i) => i.toLowerCase().includes(query));
+
+    return matchVenue && matchQuery;
+  });
+
+  // Filtered Visit Submissions
+  const filteredVisitList = visitList.filter((item) => {
+    const matchDate =
+      visitDateFilter === 'all' ||
+      (visitDateFilter === '25' && item.selectedDate.includes('25')) ||
+      (visitDateFilter === '26' && item.selectedDate.includes('26'));
+
+    const query = listSearchQuery.trim().toLowerCase();
+    const matchQuery =
+      query === '' ||
+      item.city.toLowerCase().includes(query) ||
+      item.orgName.toLowerCase().includes(query) ||
+      item.contactName.toLowerCase().includes(query) ||
+      item.phone.toLowerCase().includes(query) ||
+      item.email.toLowerCase().includes(query) ||
+      (item.facilityName && item.facilityName.toLowerCase().includes(query)) ||
+      (item.agenda && item.agenda.toLowerCase().includes(query));
+
+    return matchDate && matchQuery;
+  });
+
+  // Export Roadshow Submissions to Formatted Excel (.xls)
+  const exportRoadshowExcel = () => {
+    const tableHeader = `
+      <tr style="background-color: #2563EB; color: #FFFFFF; font-weight: bold;">
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">신청ID</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">참여장소/일자</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">기관명</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">성명</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">직책</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">연락처</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">이메일</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">인원</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">관심분야</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">비고</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">제출일시</th>
+      </tr>`;
+
+    const tableRows = filteredRoadshowList.map((r) => `
+      <tr>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${r.id}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0; font-weight: bold;">${r.selectedVenue}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0; font-weight: bold;">${r.orgName}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${r.name}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${r.position}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${r.phone}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${r.email}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0; text-align: center;">${r.attendeesCount}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${r.interests.join(' / ')}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${r.notes || ''}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${r.submittedAt}</td>
+      </tr>`).join('');
+
+    const excelTemplate = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="utf-8"/><style>table { font-family: 'Malgun Gothic', Arial, sans-serif; font-size: 12px; border-collapse: collapse; }</style></head>
+      <body>
+        <h2>만풍그룹 방한 로드쇼 참가 신청 명단</h2>
+        <table border="1">${tableHeader}${tableRows}</table>
+      </body>
+      </html>`;
+
+    const blob = new Blob(['\uFEFF' + excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `만풍그룹_로드쇼_참가신청명단_${new Date().toISOString().slice(0, 10)}.xls`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Export Visit Requests to Formatted Excel (.xls)
+  const exportVisitExcel = () => {
+    const tableHeader = `
+      <tr style="background-color: #4F46E5; color: #FFFFFF; font-weight: bold;">
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">접수ID</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">희망일자</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">도시이름</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">기관명</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">담당자 이름</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">전화번호</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">이메일 주소</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">방문시설</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">협의안건</th>
+        <th style="padding: 10px; border: 1px solid #CBD5E1;">제출일시</th>
+      </tr>`;
+
+    const tableRows = filteredVisitList.map((v) => `
+      <tr>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${v.id}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0; font-weight: bold;">${v.selectedDate}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0; font-weight: bold;">${v.city}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0; font-weight: bold;">${v.orgName}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${v.contactName}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${v.phone}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${v.email}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${v.facilityName || ''}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${v.agenda || ''}</td>
+        <td style="padding: 8px; border: 1px solid #E2E8F0;">${v.submittedAt}</td>
+      </tr>`).join('');
+
+    const excelTemplate = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="utf-8"/><style>table { font-family: 'Malgun Gothic', Arial, sans-serif; font-size: 12px; border-collapse: collapse; }</style></head>
+      <body>
+        <h2>만풍그룹 최고경영진 현장 방문요청 명단</h2>
+        <table border="1">${tableHeader}${tableRows}</table>
+      </body>
+      </html>`;
+
+    const blob = new Blob(['\uFEFF' + excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `만풍그룹_현장방문요청명단_${new Date().toISOString().slice(0, 10)}.xls`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Handle Roadshow Submit
   const handleRoadshowSubmit = (e: React.FormEvent) => {
@@ -1086,13 +1232,55 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
       {/* FORM 3: SUBMISSIONS MANAGEMENT LIST */}
       {formType === 'list' && (
         <div className="space-y-8">
+          {/* Submissions Universal Search & Filter Controls */}
+          <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={listSearchQuery}
+                  onChange={(e) => setListSearchQuery(e.target.value)}
+                  placeholder="신청 기관명, 성명, 도시, 전화번호, 이메일, 관심분야 검색..."
+                  className="w-full text-xs pl-9 pr-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-hidden focus:border-blue-500"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap text-xs">
+                <div className="flex items-center gap-1.5 text-slate-500 font-semibold shrink-0">
+                  <Filter className="w-3.5 h-3.5 text-blue-600" />
+                  <span>장소/일자 필터:</span>
+                </div>
+                <select
+                  value={venueFilter}
+                  onChange={(e) => setVenueFilter(e.target.value as any)}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-medium"
+                >
+                  <option value="all">로드쇼 전체 (용산+오송)</option>
+                  <option value="yongsan">용산역 23일만</option>
+                  <option value="osong">오송역 24일만</option>
+                </select>
+
+                <select
+                  value={visitDateFilter}
+                  onChange={(e) => setVisitDateFilter(e.target.value as any)}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-medium"
+                >
+                  <option value="all">방문요청 전체 (25일+26일)</option>
+                  <option value="25">11월 25일만</option>
+                  <option value="26">11월 26일만</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           {/* Roadshow Submissions Table */}
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-600" />
-                  <span>설명회 로드쇼 접수 현황 ({roadshowList.length}건)</span>
+                  <span>설명회 로드쇼 접수 현황 ({filteredRoadshowList.length}건 / 총 {roadshowList.length}건)</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   용산역 23일 및 오송역 24일 설명회 참가 신청 명단
@@ -1100,6 +1288,14 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={exportRoadshowExcel}
+                  className="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs"
+                  title="MS Excel 프로그램에서 바로 열리는 전용 엑셀(.xls) 파일로 다운로드합니다"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>엑셀(.xls) 다운로드</span>
+                </button>
                 <button
                   onClick={() => copyForGoogleSheets('roadshow')}
                   className="px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800 rounded-lg transition-colors flex items-center gap-1.5"
@@ -1113,7 +1309,7 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
                   ) : (
                     <>
                       <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>구글시트 붙여넣기용 복사</span>
+                      <span>구글시트용 복사</span>
                     </>
                   )}
                 </button>
@@ -1142,40 +1338,48 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                  {roadshowList.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                      <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px] whitespace-nowrap">
-                        {item.submittedAt}
-                      </td>
-                      <td className="py-2.5 px-3 font-bold whitespace-nowrap">
-                        <span className={`px-2 py-0.5 rounded text-[11px] ${
-                          item.selectedVenue.includes('용산')
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
-                            : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-                        }`}>
-                          {item.selectedVenue}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">
-                        {item.orgName}
-                      </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">
-                        {item.name} <span className="text-slate-400 text-[11px]">({item.position})</span>
-                      </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] whitespace-nowrap">
-                        {item.phone}
-                      </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px]">
-                        {item.email}
-                      </td>
-                      <td className="py-2.5 px-3 text-center font-mono">
-                        {item.attendeesCount}
-                      </td>
-                      <td className="py-2.5 px-3 text-[11px] max-w-xs truncate">
-                        {item.interests.join(', ')} {item.notes ? `· ${item.notes}` : ''}
+                  {filteredRoadshowList.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-slate-400">
+                        검색 및 필터 조건에 부합하는 로드쇼 신청 데이터가 없습니다.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredRoadshowList.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                        <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px] whitespace-nowrap">
+                          {item.submittedAt}
+                        </td>
+                        <td className="py-2.5 px-3 font-bold whitespace-nowrap">
+                          <span className={`px-2 py-0.5 rounded text-[11px] ${
+                            item.selectedVenue.includes('용산')
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                              : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                          }`}>
+                            {item.selectedVenue}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">
+                          {item.orgName}
+                        </td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          {item.name} <span className="text-slate-400 text-[11px]">({item.position})</span>
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] whitespace-nowrap">
+                          {item.phone}
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-[11px]">
+                          {item.email}
+                        </td>
+                        <td className="py-2.5 px-3 text-center font-mono">
+                          {item.attendeesCount}
+                        </td>
+                        <td className="py-2.5 px-3 text-[11px] max-w-xs truncate">
+                          {item.interests.join(', ')} {item.notes ? `· ${item.notes}` : ''}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1187,7 +1391,7 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-indigo-600" />
-                  <span>현장 방문요청서 접수 현황 ({visitList.length}건)</span>
+                  <span>현장 방문요청서 접수 현황 ({filteredVisitList.length}건 / 총 {visitList.length}건)</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   11월 25일 및 26일 만풍그룹 최고경영진 현장 방문 신청 명단
@@ -1195,6 +1399,14 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={exportVisitExcel}
+                  className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs"
+                  title="MS Excel 프로그램에서 바로 열리는 전용 엑셀(.xls) 파일로 다운로드합니다"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>엑셀(.xls) 다운로드</span>
+                </button>
                 <button
                   onClick={() => copyForGoogleSheets('visit')}
                   className="px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-300 dark:border-indigo-800 rounded-lg transition-colors flex items-center gap-1.5"
@@ -1208,7 +1420,7 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
                   ) : (
                     <>
                       <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>구글시트 붙여넣기용 복사</span>
+                      <span>구글시트용 복사</span>
                     </>
                   )}
                 </button>
@@ -1237,36 +1449,44 @@ export const RegistrationAndVisitForms: React.FC<RegistrationAndVisitFormsProps>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
-                  {visitList.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                      <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px] whitespace-nowrap">
-                        {item.submittedAt}
-                      </td>
-                      <td className="py-2.5 px-3 font-bold whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded text-[11px] bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                          {item.selectedDate}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                        {item.city}
-                      </td>
-                      <td className="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200">
-                        {item.orgName}
-                      </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">
-                        {item.contactName}
-                      </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] whitespace-nowrap">
-                        {item.phone}
-                      </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px]">
-                        {item.email}
-                      </td>
-                      <td className="py-2.5 px-3 text-[11px] max-w-sm truncate">
-                        {item.facilityName ? `[${item.facilityName}] ` : ''}{item.agenda || '-'}
+                  {filteredVisitList.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-slate-400">
+                        검색 및 필터 조건에 부합하는 방문요청 데이터가 없습니다.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredVisitList.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                        <td className="py-2.5 px-3 font-mono text-slate-400 text-[11px] whitespace-nowrap">
+                          {item.submittedAt}
+                        </td>
+                        <td className="py-2.5 px-3 font-bold whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded text-[11px] bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                            {item.selectedDate}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                          {item.city}
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200">
+                          {item.orgName}
+                        </td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          {item.contactName}
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] whitespace-nowrap">
+                          {item.phone}
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-[11px]">
+                          {item.email}
+                        </td>
+                        <td className="py-2.5 px-3 text-[11px] max-w-sm truncate">
+                          {item.facilityName ? `[${item.facilityName}] ` : ''}{item.agenda || '-'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

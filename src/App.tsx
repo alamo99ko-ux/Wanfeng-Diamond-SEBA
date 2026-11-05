@@ -12,6 +12,7 @@ import { ItineraryAndUniversities } from './components/ItineraryAndUniversities'
 import { BudgetSimulator } from './components/BudgetSimulator';
 import { RoleChecklistCenter } from './components/RoleChecklistCenter';
 import { RegistrationAndVisitForms } from './components/RegistrationAndVisitForms';
+import { DiamondAircraftSpecsModal } from './components/DiamondAircraftSpecsModal';
 import { INITIAL_CHECKLISTS, ChecklistItem } from './data/checklistsData';
 import { Plane, FileText, GitGraph, CheckCircle2, Building } from 'lucide-react';
 
@@ -19,6 +20,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('integrated');
   const [selectedDocId, setSelectedDocId] = useState<string>('doc-sacheon');
   const [selectedAssigneeFilter, setSelectedAssigneeFilter] = useState<string>('all');
+  const [isAircraftModalOpen, setIsAircraftModalOpen] = useState<boolean>(false);
   const [formPreset, setFormPreset] = useState<{
     formType: 'roadshow' | 'visit' | 'list';
     venue?: string;
@@ -62,7 +64,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    document.title = 'Wanfeng Diamond Korea Hub';
+    document.title = 'Wanfeng Diamond Korea SEBA Partners';
   }, []);
 
   useEffect(() => {
@@ -117,6 +119,7 @@ export default function App() {
         setDarkMode={setDarkMode}
         overallChecklistProgress={overallProgress}
         isBudgetUnlocked={isBudgetUnlocked}
+        onOpenAircraftModal={() => setIsAircraftModalOpen(true)}
       />
 
       {/* Main Container */}
@@ -126,6 +129,7 @@ export default function App() {
             setActiveTab={setActiveTab}
             onSelectDoc={handleSelectDoc}
             overallChecklistProgress={overallProgress}
+            onOpenAircraftModal={() => setIsAircraftModalOpen(true)}
           />
         )}
 
@@ -154,6 +158,7 @@ export default function App() {
             setActiveTab={setActiveTab}
             onSelectChecklistAssignee={handleSelectChecklistAssignee}
             onSelectFormPreset={setFormPreset}
+            onOpenAircraftModal={() => setIsAircraftModalOpen(true)}
           />
         )}
 
@@ -185,6 +190,16 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Aircraft Spec Comparison Modal */}
+      <DiamondAircraftSpecsModal
+        isOpen={isAircraftModalOpen}
+        onClose={() => setIsAircraftModalOpen(false)}
+        onSelectFormPreset={(preset) => {
+          setFormPreset(preset);
+          setActiveTab('forms');
+        }}
+      />
 
       {/* Clean Editorial Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 py-8 transition-colors mt-auto">

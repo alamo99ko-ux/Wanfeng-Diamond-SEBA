@@ -153,7 +153,7 @@ export const BudgetSimulator: React.FC<BudgetSimulatorProps> = ({
                   setPasswordInput(e.target.value);
                   setPasswordError(false);
                 }}
-                placeholder="비밀번호 8자리 입력 (28687870)"
+                placeholder="보안 비밀번호 8자리 입력"
                 className={`w-full px-4 py-2.5 text-sm rounded-xl border bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 pr-10 ${
                   passwordError
                     ? 'border-red-500 focus:ring-red-400'
@@ -185,10 +185,6 @@ export const BudgetSimulator: React.FC<BudgetSimulatorProps> = ({
               <span>비용 시뮬레이터 잠금 해제</span>
             </button>
           </form>
-
-          <div className="text-[11px] text-slate-400 dark:text-slate-500">
-            보안 패스워드 설정: <span className="font-mono font-semibold">28687870</span>
-          </div>
         </div>
       </div>
     );

@@ -232,34 +232,102 @@ export const RoleChecklistCenter: React.FC<RoleChecklistCenterProps> = ({
           />
         </div>
 
-        {/* Per-assignee completion chips */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-          {assigneeOptions.slice(1).map((opt) => {
-            const assigneeTasks = checklists.filter((c) => c.assigneeId === opt.id);
-            const done = assigneeTasks.filter((c) => c.status === 'completed').length;
-            const pct = assigneeTasks.length > 0 ? Math.round((done / assigneeTasks.length) * 100) : 0;
-            const isFilterActive = selectedAssignee === opt.id;
+        {/* Assignee Completion Visualization Section */}
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
+            <span className="flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>담당자별 완료 현황 시각화 그래프</span>
+            </span>
+            <span className="text-[11px] font-normal text-slate-500">
+              * 카드를 클릭하면 해당 담당자의 체크리스트만 필터링됩니다.
+            </span>
+          </div>
 
-            return (
-              <button
-                key={opt.id}
-                onClick={() => setSelectedAssignee(isFilterActive ? 'all' : opt.id)}
-                className={`p-2 rounded-lg border text-left transition-all ${
-                  isFilterActive
-                    ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 shadow-xs'
-                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300'
-                }`}
-              >
-                <div className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 truncate">
-                  {opt.label}
-                </div>
-                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-mono">
-                  <span>{done}/{assigneeTasks.length}</span>
-                  <span className="font-bold text-blue-600 dark:text-blue-400">{pct}%</span>
-                </div>
-              </button>
-            );
-          })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {assigneeOptions.slice(1).map((opt) => {
+              const assigneeTasks = checklists.filter((c) => c.assigneeId === opt.id);
+              const doneCount = assigneeTasks.filter((c) => c.status === 'completed').length;
+              const inProgCount = assigneeTasks.filter((c) => c.status === 'in_progress').length;
+              const pendingCount = assigneeTasks.filter((c) => c.status === 'pending').length;
+              const total = assigneeTasks.length;
+              const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+              const isFilterActive = selectedAssignee === opt.id;
+
+              const doneBarPct = total > 0 ? (doneCount / total) * 100 : 0;
+              const inProgBarPct = total > 0 ? (inProgCount / total) * 100 : 0;
+              const pendingBarPct = total > 0 ? (pendingCount / total) * 100 : 0;
+
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => setSelectedAssignee(isFilterActive ? 'all' : opt.id)}
+                  className={`p-3.5 rounded-xl border text-left transition-all space-y-2.5 ${
+                    isFilterActive
+                      ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-950/50 ring-2 ring-blue-500/30 shadow-xs'
+                      : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-blue-300 dark:hover:border-slate-700'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                        {opt.label}
+                      </div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                        {opt.role}
+                      </div>
+                    </div>
+                    <span
+                      className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                        pct >= 80
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                          : pct >= 50
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                      }`}
+                    >
+                      {pct}%
+                    </span>
+                  </div>
+
+                  {/* Multi-segment Progress Bar Graph */}
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden flex">
+                    <div
+                      style={{ width: `${doneBarPct}%` }}
+                      className="bg-emerald-500 transition-all duration-300"
+                      title={`완료 ${doneCount}개 (${Math.round(doneBarPct)}%)`}
+                    />
+                    <div
+                      style={{ width: `${inProgBarPct}%` }}
+                      className="bg-amber-400 transition-all duration-300"
+                      title={`진행중 ${inProgCount}개 (${Math.round(inProgBarPct)}%)`}
+                    />
+                    <div
+                      style={{ width: `${pendingBarPct}%` }}
+                      className="bg-slate-300 dark:bg-slate-600 transition-all duration-300"
+                      title={`미착수 ${pendingCount}개 (${Math.round(pendingBarPct)}%)`}
+                    />
+                  </div>
+
+                  {/* Status Numbers Breakdown */}
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400 pt-0.5">
+                    <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                      ● 완료 {doneCount}
+                    </span>
+                    <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                      ▲ 진행 {inProgCount}
+                    </span>
+                    <span className="flex items-center gap-1 text-slate-400">
+                      ○ 미착수 {pendingCount}
+                    </span>
+                    <span className="text-slate-600 dark:text-slate-300 font-bold">
+                      총 {total}건
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

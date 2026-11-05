@@ -10,6 +10,7 @@ interface HeaderProps {
   setDarkMode: (val: boolean) => void;
   overallChecklistProgress: number;
   isBudgetUnlocked?: boolean;
+  onOpenAircraftModal?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -19,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   setDarkMode,
   overallChecklistProgress,
   isBudgetUnlocked = false,
+  onOpenAircraftModal,
 }) => {
   const navItems: { id: ActiveTab; label: string; isBudget?: boolean }[] = [
     { id: 'integrated', label: '종합 대시보드' },
@@ -60,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id)}
-                    title="비용 관련 보고서 (보안 비밀번호 필요: 28687870)"
+                    title="비용 관련 보고서 (대외비 보안 인증 필요)"
                     className={`px-3 py-2 text-xs font-semibold rounded-md whitespace-nowrap transition-colors flex items-center gap-1.5 border ${
                       isActive
                         ? 'bg-slate-300 dark:bg-slate-700 text-slate-900 dark:text-white border-slate-400 dark:border-slate-600 shadow-xs ring-1 ring-slate-400'
@@ -122,6 +124,16 @@ export const Header: React.FC<HeaderProps> = ({
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+
+            {onOpenAircraftModal && (
+              <button
+                onClick={onOpenAircraftModal}
+                className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-lg transition-colors shadow-2xs whitespace-nowrap"
+              >
+                <Plane className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span>DA40/42 제원 비교</span>
+              </button>
+            )}
 
             <button
               onClick={() => setActiveTab('forms')}

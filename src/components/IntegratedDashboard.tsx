@@ -14,7 +14,8 @@ import {
   Award,
   Compass,
   Briefcase,
-  FileText
+  FileText,
+  Plane
 } from 'lucide-react';
 import { DOCUMENTS_DATA } from '../data/documentsData';
 import { ITINERARY_DAYS } from '../data/universitiesAndItineraryData';
@@ -23,12 +24,14 @@ interface IntegratedDashboardProps {
   setActiveTab: (tab: ActiveTab) => void;
   onSelectDoc?: (docId: string) => void;
   overallChecklistProgress: number;
+  onOpenAircraftModal?: () => void;
 }
 
 export const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
   setActiveTab,
   onSelectDoc,
   overallChecklistProgress,
+  onOpenAircraftModal,
 }) => {
   const heroImage = '/src/assets/images/diamond_aircraft_hero_1793839052359.jpg';
   const meetingImage = '/src/assets/images/aviation_executive_meeting_1793839054720.jpg';
@@ -61,6 +64,15 @@ export const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
             </div>
 
             <div className="pt-6 sm:pt-8 flex flex-wrap items-center gap-3">
+              {onOpenAircraftModal && (
+                <button
+                  onClick={onOpenAircraftModal}
+                  className="px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center gap-2 shadow-xs"
+                >
+                  <Plane className="w-4 h-4 text-white" />
+                  <span>DA40/DA42 상세 제원 비교 팝업</span>
+                </button>
+              )}
               <button
                 onClick={() => setActiveTab('relationships')}
                 className="px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg transition-colors flex items-center gap-2 shadow-xs"
